@@ -39,24 +39,28 @@ angular
 		 * parse swagger description to ease HTML generation
 		 */
 		function parseSwagger2Json(swagger, url, deferred, parseResult) {
-			var map = {},
-				form = {},
-				resources = [],
-				infos = swagger.info,
-				openPath = $location.hash(),
-				defaultContentType = 'application/json';
+			// Fully resolve references ($ref) using Sway parser
+			Sway.create({ definition: swagger }).then(function (res) {
+				swagger = res.definitionFullyResolved;
+				var map = {},
+					form = {},
+					resources = [],
+					infos = swagger.info,
+					openPath = $location.hash(),
+					defaultContentType = 'application/json';
 
-			operationId = 0;
-			paramId = 0;
-			parseInfos(swagger, url, infos, defaultContentType);
-			parseTags(swagger, resources, map);
-			parseOperations(swagger, resources, form, map, defaultContentType, openPath);
-			cleanUp(resources, openPath);
-			// prepare result
-			parseResult.infos = infos;
-			parseResult.resources = resources;
-			parseResult.form = form;
-			deferred.resolve(true);
+				operationId = 0;
+				paramId = 0;
+				parseInfos(swagger, url, infos, defaultContentType);
+				parseTags(swagger, resources, map);
+				parseOperations(swagger, resources, form, map, defaultContentType, openPath);
+				cleanUp(resources, openPath);
+				// prepare result
+				parseResult.infos = infos;
+				parseResult.resources = resources;
+				parseResult.form = form;
+				deferred.resolve(true);
+			});
 		}
 
 		/**
